@@ -1,2 +1,0 @@
-# CiviCRM
-CiviCRM repository

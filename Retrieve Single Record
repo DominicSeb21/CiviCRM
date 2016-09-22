@@ -1,0 +1,107 @@
+{!requireScript('/soap/ajax/29.0/connection.js')}; 
+{!requireScript('/soap/ajax/29.0/apex.js')}; 
+
+
+sforce.connection.remoteFunction({ 
+url : "https://www.donorlead.net/API/get.php?id={!Contact.Id}&key={!$User.DonorSearch_Key__c}", 
+method: "GET", 
+onSuccess : function(res) { 
+res = res.replace(/&lt;/g,"<"); 
+res = res.replace(/&gt;/g,">"); 
+res = res.replace(/&nbsp;/g," "); 
+var dsrating = res.match(/<DS_Rating>(.*?)<\/DS_Rating>/); 
+var overall = res.match(/<Overall>(.*?)<\/Overall>/); 
+var low = res.match(/<LargestGiftLow>(.*?)<\/LargestGiftLow>/); 
+var high = res.match(/<LargestGiftHigh>(.*?)<\/LargestGiftHigh>/); 
+var giftrange = low[1] + " - " + high[1]; 
+var largestgift = res.match(/<LargestGiftHigh>(.*?)<\/LargestGiftHigh>/); 
+var capacity = res.match(/<EstimatedCapacity>(.*?)<\/EstimatedCapacity>/); 
+// cahf 11-10-14 wealth capacity fix 1 line of code 
+var wealthCapRange = res.match(/<CapacityRange>(.*?)<\/CapacityRange>/); 
+var screendate = res.match(/<submit_time>(.*?)<\/submit_time>/); 
+var realestate = res.match(/<RealEstateEst>(.*?)<\/RealEstateEst>/); 
+var totalmatches = res.match(/<LikelyMatchesTotal>(.*?)<\/LikelyMatchesTotal>/); 
+var politicaltotal = res.match(/<PoliticalLikelyTotal>(.*?)<\/PoliticalLikelyTotal>/); 
+var profile = res.match(/<profile_link>(.*?)<\/profile_link>/); 
+var realcount = res.match(/<RealEstateCount>(.*?)<\/RealEstateCount>/); 
+var politicalcount = res.match(/<PoliticalLikelyCount>(.*?)<\/PoliticalLikelyCount>/); 
+var businessrev = res.match(/<BusinessRevenues>(.*?)<\/BusinessRevenues>/); 
+var secstockval = res.match(/<SECStockValue>(.*?)<\/SECStockValue>/); 
+var secin = res.match(/<SECInsider>(.*?)<\/SECInsider>/); 
+var marketguide =res.match(/<MarketGuide>(.*?)<\/MarketGuide>/); 
+var fndboard = res.match(/<FndBoard>(.*?)<\/FndBoard>/); 
+var gsboard = res.match(/<GSBoard>(.*?)<\/GSBoard>/); 
+var matchcount = res.match(/<LikelyMatchesCount>(.*?)<\/LikelyMatchesCount>/); 
+var updateRecords = []; 
+
+
+var DS = new sforce.SObject("DonorSearch_del_del__c"); 
+
+
+var dsratings = dsrating[1].toString(); 
+var overalls = overall[1].toString(); 
+var giftranges = giftrange.toString(); 
+var highs = high[1].toString(); 
+var capacitys = capacity[1].toString(); 
+// cahf 11-10-14 wealth capacity fix 
+var wealthCapRanges = wealthCapRange[1].toString(); 
+var screendates = screendate[1].toString(); 
+var realestates = realestate[1].toString(); 
+var totalmatchess = totalmatches[1].toString(); 
+var politicaltotals = politicaltotal[1].toString(); 
+var realcounts = realcount[1].toString(); 
+var politicalcounts = politicalcount[1].toString(); 
+var businessrevs = businessrev[1].toString(); 
+var secstockvals = secstockval[1].toString(); 
+var secins = secin[1].toString(); 
+var marketguides = marketguide[1].toString(); 
+var fndboards = fndboard[1].toString(); 
+var gsboards = gsboard[1].toString(); 
+var matchcounts = matchcount[1].toString(); 
+
+
+DS.DS_Rating__c = dsratings; 
+DS.Overall__c = overalls; 
+DS.Largest_Gift_Found_Lower_Range__c = giftranges; 
+DS.Largest_Gift_Found__c = highs; 
+// cahf 11-10-14 commented out and added following 2 lines of code to correct wealth capacity and range issues 
+//DS.Wealth_Capacity_Range__c = capacitys; 
+DS.Wealth_Capacity_Range__c = wealthCapRanges; 
+DS.Wealth_Score__c = capacitys; 
+DS.Screening_Date__c = screendates; 
+DS.Real_estate_estimate__c = realestates; 
+DS.Total_of_likely_matches__c = totalmatchess; 
+DS.Political_total__c = politicaltotals; 
+DS.Profile__c = profile[1]; 
+DS.Real_estate_count__c = realcounts; 
+DS.Political_count__c = politicalcounts; 
+DS.Business__c = businessrevs; 
+DS.Sec_stock_value__c =secstockvals; 
+DS.Sec_Insider__c = secins; 
+DS.Market_guide__c = marketguides; 
+DS.Fnd_board__c = fndboards; 
+DS.GS_board__c = gsboards; 
+DS.Match_count__c = matchcounts; 
+
+if(dsratings == ""){ 
+alert("Please perform an Integrated Search first."); 
+exit(); 
+} 
+
+var cid = "{!Contact.Id}"; 
+DS.ID__c = cid; 
+DS.set("External_ID__c", "{!Contact.Id}"); 
+
+
+try 
+{ 
+sforce.connection.upsert("External_ID__c",[DS], false); 
+location.reload(); 
+} 
+catch (error) 
+{ 
+alert("Failed to Update with error: " + error); 
+} 
+
+} 
+});
