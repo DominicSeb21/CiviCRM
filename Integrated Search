@@ -1,0 +1,13 @@
+openwindow(); 
+
+function openwindow() { 
+var zip = "{!(Contact.MailingPostalCode)}"; 
+var hyphen = zip.indexOf("-"); 
+if (hyphen == -1){ 
+var zip5 = zip; 
+}else{ 
+var zip5 = zip.slice(0, hyphen); 
+} 
+
+window.open("https://www.donorlead.net/API/display.php?dFname={!URLENCODE(Contact.FirstName)}&dLname={!URLENCODE(Contact.LastName)}&dState={!URLENCODE(Contact.MailingState)}&dAddress={!URLENCODE(Contact.MailingStreet)}&dCity={!URLENCODE(Contact.MailingCity)}&dZip="+zip5+"&dMname={!URLENCODE(Contact.Middle_Initial_Name__c)}&key={!User.DonorSearch_Key__c}&id={!Contact.Id}") 
+}
